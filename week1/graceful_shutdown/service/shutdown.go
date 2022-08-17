@@ -45,18 +45,18 @@ type App struct {
 
 // NewApp 创建 App 实例，注意设置默认值，同时使用这些选项
 func NewApp(servers []*Server, opts ...Option) *App {
-	a := App{
+	a := &App{
 		servers:         servers,
-		shutdownTimeout: 30,
-		waitTime:        10,
-		cbTimeout:       3,
-		cbs:             nil,
+		shutdownTimeout: 30 * time.Second,
+		waitTime:        10 * time.Second,
+		cbTimeout:       3 * time.Second,
+		//cbs:             nil,
 	}
 
 	for _, o := range opts {
-		o(&a)
+		o(a)
 	}
-	return &a
+	return a
 }
 
 // StartAndServe 你主要要实现这个方法
@@ -77,7 +77,7 @@ func (app *App) StartAndServe() {
 	// 从这里开始优雅退出监听系统信号，强制退出以及超时强制退出。
 	// 优雅退出的具体步骤在 shutdown 里面实现
 	// 所以你需要在这里恰当的位置，调用 shutdown
-
+	fmt.Println("DEBUG1")
 	shutdownSignals := []os.Signal{
 		os.Interrupt, os.Kill, syscall.SIGKILL, syscall.SIGSTOP,
 		syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGILL, syscall.SIGTRAP,
@@ -92,17 +92,9 @@ func (app *App) StartAndServe() {
 	}
 
 	go func() {
-
-		for _, s := range app.servers {
-			err := s.srv.ListenAndServe()
-			if err != nil {
-				log.Println(err)
-				os.Exit(0)
-			}
-		}
-
 		select {
 		case sig := <-signals:
+			fmt.Println("DEBUG2")
 			log.Printf("get signal %s, applicationConfig will shutdown.", sig)
 			time.AfterFunc(app.shutdownTimeout, func() {
 				log.Println("Shutdown gracefully timeout, applicationConfig will shutdown immediately.")
@@ -115,7 +107,8 @@ func (app *App) StartAndServe() {
 					debug.WriteHeapDump(os.Stdout.Fd())
 				}
 			}
-			os.Exit(0)
+			// os.Exit(0)
+			syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 		}
 	}()
 }
@@ -214,6 +207,9 @@ func (s *Server) Handle(pattern string, handler http.Handler) {
 }
 
 func (s *Server) Start() error {
+	fmt.Println("-------")
+	fmt.Println(s.srv.Addr)
+	fmt.Println("-------")
 	return s.srv.ListenAndServe()
 }
 
