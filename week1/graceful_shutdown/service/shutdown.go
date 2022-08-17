@@ -119,7 +119,7 @@ func (app *App) shutdown() {
 	log.Println("开始关闭应用，停止接收新请求")
 	// 你需要在这里让所有的 server 拒绝新请求
 	for _, s := range app.servers {
-		srv := s.srv
+		srv := s
 		srv.rejectReq()
 	}
 
@@ -137,7 +137,10 @@ func (app *App) shutdown() {
 		go func(idx int) {
 			defer wg.Done()
 			fmt.Printf("stop %v server", idx)
-			s.stop()
+			err := s.stop()
+			if err != nil {
+				fmt.Println("stop server", err)
+			}
 		}(i)
 	}
 
