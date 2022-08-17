@@ -11,8 +11,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-
-	"github.com/dubbogo/gost/log/logger"
 )
 
 // 典型的 Option 设计模式
@@ -94,12 +92,20 @@ func (app *App) StartAndServe() {
 	}
 
 	go func() {
+
+		for _, s := range app.servers {
+			err := s.srv.ListenAndServe()
+			if err != nil {
+				log.Println(err)
+				os.Exit(0)
+			}
+		}
+
 		select {
 		case sig := <-signals:
-			logger.Infof("get signal %s, applicationConfig will shutdown.", sig)
-			// gracefulShutdownOnce.Do(func() {
+			log.Printf("get signal %s, applicationConfig will shutdown.", sig)
 			time.AfterFunc(app.shutdownTimeout, func() {
-				logger.Warn("Shutdown gracefully timeout, applicationConfig will shutdown immediately. ")
+				log.Println("Shutdown gracefully timeout, applicationConfig will shutdown immediately.")
 				os.Exit(0)
 			})
 			app.shutdown()
@@ -119,8 +125,7 @@ func (app *App) shutdown() {
 	log.Println("开始关闭应用，停止接收新请求")
 	// 你需要在这里让所有的 server 拒绝新请求
 	for _, s := range app.servers {
-		srv := s
-		srv.rejectReq()
+		s.rejectReq()
 	}
 
 	log.Println("等待正在执行请求完结")
@@ -134,14 +139,14 @@ func (app *App) shutdown() {
 
 	for i, s := range app.servers {
 		wg.Add(1)
-		go func(idx int) {
+		go func(idx int, srv *Server) {
 			defer wg.Done()
 			fmt.Printf("stop %v server", idx)
-			err := s.stop()
+			err := srv.stop()
 			if err != nil {
 				fmt.Println("stop server", err)
 			}
-		}(i)
+		}(i, s)
 	}
 
 	wg.Wait()
@@ -151,11 +156,11 @@ func (app *App) shutdown() {
 
 	for i, cb := range app.cbs {
 		wg.Add(1)
-		go func(idx int) {
+		go func(idx int, cb ShutdownCallback) {
 			defer wg.Done()
 			fmt.Println("call cb in cbs at index", idx)
 			cb(context.Background()) //TODO: check where context from
-		}(i)
+		}(i, cb)
 	}
 
 	wg.Wait()
