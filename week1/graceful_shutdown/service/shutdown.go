@@ -91,26 +91,26 @@ func (app *App) StartAndServe() {
 		syscall.SIGTRAP, syscall.SIGABRT, syscall.SIGSYS,
 	}
 
-	go func() {
-		select {
-		case sig := <-signals:
-			fmt.Println("DEBUG2")
-			log.Printf("get signal %s, applicationConfig will shutdown.", sig)
-			time.AfterFunc(app.shutdownTimeout, func() {
-				log.Println("Shutdown gracefully timeout, applicationConfig will shutdown immediately.")
-				os.Exit(0)
-			})
-			app.shutdown()
-			// those signals' original behavior is exit with dump ths stack, so we try to keep the behavior
-			for _, dumpSignal := range dumpHeapShutdownSignals {
-				if sig == dumpSignal {
-					debug.WriteHeapDump(os.Stdout.Fd())
-				}
+	// go func() {
+	select {
+	case sig := <-signals:
+		fmt.Println("DEBUG2")
+		log.Printf("get signal %s, applicationConfig will shutdown.", sig)
+		time.AfterFunc(app.shutdownTimeout, func() {
+			log.Println("Shutdown gracefully timeout, applicationConfig will shutdown immediately.")
+			os.Exit(0)
+		})
+		app.shutdown()
+		// those signals' original behavior is exit with dump ths stack, so we try to keep the behavior
+		for _, dumpSignal := range dumpHeapShutdownSignals {
+			if sig == dumpSignal {
+				debug.WriteHeapDump(os.Stdout.Fd())
 			}
-			// os.Exit(0)
-			syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 		}
-	}()
+		// os.Exit(0)
+		syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
+	}
+	// }()
 }
 
 // shutdown 你要设计这里面的执行步骤。
