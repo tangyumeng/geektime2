@@ -31,20 +31,20 @@ func TestInsertStmt(t *testing.T) {
 			wantArgs: []interface{}{int64(0), (*int64)(nil)},
 			wantSQL:  "INSERT INTO `BaseEntity`(`CreateTime`,`UpdateTime`) VALUES(?,?);",
 		},
-		// {
-		// 	name:     "pointer",
-		// 	entity:   &BaseEntity{CreateTime: 123, UpdateTime: ptrInt64(234)},
-		// 	wantArgs: []interface{}{int64(123), ptrInt64(234)},
-		// 	wantSQL:  "INSERT INTO `BaseEntity`(`CreateTime`,`UpdateTime`) VALUES(?,?);",
-		// },
-		// {
-		// 	name: "multiple pointer",
-		// 	entity: func() interface{} {
-		// 		entity := &BaseEntity{CreateTime: 123, UpdateTime: ptrInt64(234)}
-		// 		return &entity
-		// 	}(),
-		// 	wantErr: errInvalidEntity,
-		// },
+		{
+			name:     "pointer",
+			entity:   &BaseEntity{CreateTime: 123, UpdateTime: ptrInt64(234)},
+			wantArgs: []interface{}{int64(123), ptrInt64(234)},
+			wantSQL:  "INSERT INTO `BaseEntity`(`CreateTime`,`UpdateTime`) VALUES(?,?);",
+		},
+		{
+			name: "multiple pointer",
+			entity: func() interface{} {
+				entity := &BaseEntity{CreateTime: 123, UpdateTime: ptrInt64(234)}
+				return &entity
+			}(),
+			wantErr: errInvalidEntity,
+		},
 		// {
 		// 	// 组合
 		// 	name: "composition",

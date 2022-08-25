@@ -18,7 +18,7 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 	typ := reflect.TypeOf(entity)
 	val := reflect.ValueOf(entity)
 
-	for typ.Kind() == reflect.Ptr {
+	if typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
 		val = val.Elem()
 	}
@@ -44,6 +44,8 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 	first := true
 	for i := 0; i < num; i++ {
 		fd := typ.Field(i)
+		fdVal := val.Field(i)
+		res = append(res, fdVal.Interface())
 		if fd.IsExported() {
 			if first {
 				bd.WriteString("`")
@@ -70,6 +72,7 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 	bd.WriteString(");")
 	fmt.Println("------------")
 	fmt.Println(bd.String())
+	fmt.Println(res...)
 	fmt.Println("------------")
 
 	// []interface{}{int64(0), (*int64)(nil)},
