@@ -45,21 +45,21 @@ func TestInsertStmt(t *testing.T) {
 			}(),
 			wantErr: errInvalidEntity,
 		},
-		// {
-		// 	// 组合
-		// 	name: "composition",
-		// 	entity: User{
-		// 		BaseEntity: BaseEntity{
-		// 			CreateTime: 123,
-		// 			UpdateTime: ptrInt64(456),
-		// 		},
-		// 		Id:       789,
-		// 		NickName: sql.NullString{String: "Tom", Valid: true},
-		// 	},
-		// 	wantArgs: []interface{}{int64(123), ptrInt64(456), uint64(789),
-		// 		sql.NullString{String: "Tom", Valid: true}, (*sql.NullInt32)(nil)},
-		// 	wantSQL: "INSERT INTO `User`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`) VALUES(?,?,?,?,?);",
-		// },
+		{
+			// 组合
+			name: "composition",
+			entity: User{
+				BaseEntity: BaseEntity{
+					CreateTime: 123,
+					UpdateTime: ptrInt64(456),
+				},
+				Id:       789,
+				NickName: sql.NullString{String: "Tom", Valid: true},
+			},
+			wantArgs: []interface{}{int64(123), ptrInt64(456), uint64(789),
+				sql.NullString{String: "Tom", Valid: true}, (*sql.NullInt32)(nil)},
+			wantSQL: "INSERT INTO `User`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`) VALUES(?,?,?,?,?);",
+		},
 		// {
 		// 	name: "deep composition",
 		// 	entity: &Buyer{
