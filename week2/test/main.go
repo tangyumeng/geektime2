@@ -153,6 +153,132 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 	// return bd.String(), args, nil
 }
 
+type GenSQL struct {
+	err        error
+	EntityName string
+	// Columns    []string
+	Keys *[]string
+	Vals *[]any
+}
+
+func NewGenSQL() *GenSQL {
+	m := make([]string, 0)
+	n := make([]any, 0)
+	return &GenSQL{
+		Keys: &m,
+		Vals: &n,
+	}
+}
+
+func (g *GenSQL) CollectFieldNames(entity any, m *[]string, n *[]any) {
+
+	if entity == nil {
+
+	}
+
+	typ := reflect.TypeOf(entity)
+	val := reflect.ValueOf(entity)
+
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+		val = val.Elem()
+
+	}
+	num := typ.NumField()
+
+	for i := 0; i < num; i++ {
+		fd := typ.Field(i)
+		fdVal := val.Field(i)
+
+		fdValInterface := fdVal.Interface()
+
+		switch fdValInterface := fdValInterface.(type) {
+		case string:
+			fmt.Println("string")
+		case sql.NullString:
+			fmt.Println("sql.NullString")
+		}
+
+		// if fdVal.Kind() == reflect.Struct {
+		// 	g.CollectFieldNames(fdVal.Interface(), m, n)
+		// } else if (fdVal.Interface()).(type) == sql.NullString {
+		// 	*m = append(*m, fd.Name)
+		// 	*n = append(*n, fdVal.Interface())
+		// }
+	}
+}
+
+// func (g *GenSQL) Gen(val reflect.Value) {
+// 	if !val.IsValid() {
+// 		g.err = errInvalidEntity
+// 		return
+// 	}
+
+// 	typ := reflect.TypeOf(val)
+// 	// val := reflect.ValueOf(val)
+
+// 	if typ.Kind() == reflect.Ptr {
+// 		typ = typ.Elem()
+// 		val = val.Elem()
+// 	}
+
+// 	// 如果不是结构体，就返回 error
+// 	if typ.Kind() != reflect.Struct {
+// 		g.err = errInvalidEntity
+// 	}
+
+// 	if g.EntityName == "" {
+// 		g.EntityName = typ.Name()
+// 	}
+
+// 	num := typ.NumField()
+
+// 	for i := 0; i < num; i++ {
+
+// 		isStruct := val.Field(i).Kind() == reflect.Struct
+
+// 		fmt.Println("1111")
+
+// 		if isStruct {
+// 			g.Gen(val.Field(i))
+// 			continue
+// 		}
+
+// 		g.GenColumn(val.Type().Field(i).Name, val.Field(i).Interface())
+// 	}
+
+// 	fmt.Println(g.Columns)
+// }
+
+// func (g *GenSQL) GenColumn(name string, val any) {
+// 	column := "`" + name + "`"
+// 	g.Columns = append(g.Columns, column)
+// 	// t.seen[column] = struct{}{}
+// 	// t.values = append(t.values, val)
+// }
+
+// func (g *GenSQL) CollectFieldNames(t reflect.Type, m map[string]struct{}) {
+
+// 	// Return if not struct or pointer to struct.
+// 	if t.Kind() == reflect.Ptr {
+// 		t = t.Elem()
+// 	}
+// 	if t.Kind() != reflect.Struct {
+// 		return
+// 	}
+
+// 	// Iterate through fields collecting names in map.
+// 	for i := 0; i < t.NumField(); i++ {
+// 		sf := t.Field(i)
+// 		m[sf.Name] = struct{}{}
+
+// 		// Recurse into anonymous fields.
+// 		if sf.Anonymous {
+// 			g.CollectFieldNames(sf.Type, m)
+// 		}
+// 	}
+// }
+
 func main() {
 
 	u := User{
@@ -160,13 +286,24 @@ func main() {
 			CreateTime: 123,
 			UpdateTime: ptrInt64(456),
 		},
-		Id:       789,
-		NickName: sql.NullString{String: "Tom", Valid: true},
+		Id: 789,
 	}
 
-	i, j, k := InsertStmt(u)
+	g := NewGenSQL()
+	m := make([]string, 0)
+	n := make([]any, 0)
+	g.CollectFieldNames(u, &m, &n)
 
-	fmt.Println(i, j, k)
+	fmt.Println("--------- m")
+	for _, v := range m {
+		fmt.Println(v)
+	}
+
+	fmt.Println("--------- n")
+
+	for _, v := range n {
+		fmt.Println(v)
+	}
 }
 
 func ptrInt64(val int64) *int64 {
