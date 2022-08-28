@@ -103,24 +103,24 @@ func TestInsertStmt(t *testing.T) {
 		// 		sql.NullString{String: "Tom", Valid: true}, &sql.NullInt32{Int32: 18, Valid: true}, "China", "DM"},
 		// 	wantSQL: "INSERT INTO `Customer`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`,`Address`,`Company`) VALUES(?,?,?,?,?,?,?);",
 		// },
-		// {
-		// 	// 使用指针的组合，我们不会深入解析，会出现很奇怪的结果
-		// 	name: "pointer composition",
-		// 	entity: InvalidUser{
-		// 		BaseEntity: &BaseEntity{},
-		// 		Address:    "China",
-		// 	},
-		// 	// &BaseEntity{} 这个参数发送到 driver 那里，会出现无法解析的情况
-		// 	wantArgs: []interface{}{&BaseEntity{}, "China"},
-		// 	wantSQL:  "INSERT INTO `InvalidUser`(`BaseEntity`,`Address`) VALUES(?,?);",
-		// },
-		// {
-		// 	name:   "not embed field",
-		// 	entity: Seller{User: User{}},
-		// 	// 顺便测试一下单个字段
-		// 	wantArgs: []interface{}{User{}},
-		// 	wantSQL:  "INSERT INTO `Seller`(`User`) VALUES(?);",
-		// },
+		{
+			// 使用指针的组合，我们不会深入解析，会出现很奇怪的结果
+			name: "pointer composition",
+			entity: InvalidUser{
+				BaseEntity: &BaseEntity{},
+				Address:    "China",
+			},
+			// &BaseEntity{} 这个参数发送到 driver 那里，会出现无法解析的情况
+			wantArgs: []interface{}{&BaseEntity{}, "China"},
+			wantSQL:  "INSERT INTO `InvalidUser`(`BaseEntity`,`Address`) VALUES(?,?);",
+		},
+		{
+			name:   "not embed field",
+			entity: Seller{User: User{}},
+			// 顺便测试一下单个字段
+			wantArgs: []interface{}{User{}},
+			wantSQL:  "INSERT INTO `Seller`(`User`) VALUES(?);",
+		},
 	}
 
 	for _, tc := range testCases {
