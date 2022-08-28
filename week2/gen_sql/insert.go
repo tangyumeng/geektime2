@@ -62,18 +62,10 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 type GenSQL struct {
 	Err        error
 	EntityName string
-	// Columns    []string
-	Keys *[]string
-	Vals *[]any
 }
 
 func NewGenSQL() *GenSQL {
-	m := make([]string, 0)
-	n := make([]any, 0)
-	return &GenSQL{
-		Keys: &m,
-		Vals: &n,
-	}
+	return &GenSQL{}
 }
 
 func (g *GenSQL) CollectFieldNames(entity any, m *[]string, n *[]any) {
