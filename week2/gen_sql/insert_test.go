@@ -60,24 +60,24 @@ func TestInsertStmt(t *testing.T) {
 				sql.NullString{String: "Tom", Valid: true}, (*sql.NullInt32)(nil)},
 			wantSQL: "INSERT INTO `User`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`) VALUES(?,?,?,?,?);",
 		},
-		// {
-		// 	name: "deep composition",
-		// 	entity: &Buyer{
-		// 		User: User{
-		// 			BaseEntity: BaseEntity{
-		// 				CreateTime: 123,
-		// 				UpdateTime: ptrInt64(456),
-		// 			},
-		// 			Id:       789,
-		// 			NickName: sql.NullString{String: "Tom", Valid: true},
-		// 			Age:      &sql.NullInt32{Int32: 18, Valid: true},
-		// 		},
-		// 		Address: "China",
-		// 	},
-		// 	wantArgs: []interface{}{int64(123), ptrInt64(456), uint64(789),
-		// 		sql.NullString{String: "Tom", Valid: true}, &sql.NullInt32{Int32: 18, Valid: true}, "China"},
-		// 	wantSQL: "INSERT INTO `Buyer`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`,`Address`) VALUES(?,?,?,?,?,?);",
-		// },
+		{
+			name: "deep composition",
+			entity: &Buyer{
+				User: User{
+					BaseEntity: BaseEntity{
+						CreateTime: 123,
+						UpdateTime: ptrInt64(456),
+					},
+					Id:       789,
+					NickName: sql.NullString{String: "Tom", Valid: true},
+					Age:      &sql.NullInt32{Int32: 18, Valid: true},
+				},
+				Address: "China",
+			},
+			wantArgs: []interface{}{int64(123), ptrInt64(456), uint64(789),
+				sql.NullString{String: "Tom", Valid: true}, &sql.NullInt32{Int32: 18, Valid: true}, "China"},
+			wantSQL: "INSERT INTO `Buyer`(`CreateTime`,`UpdateTime`,`Id`,`NickName`,`Age`,`Address`) VALUES(?,?,?,?,?,?);",
+		},
 		// {
 		// 	name: "multiple composition",
 		// 	entity: &Customer{
