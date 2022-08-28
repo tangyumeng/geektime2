@@ -20,17 +20,6 @@ func InsertStmt(entity interface{}) (string, []interface{}, error) {
 	if g.Err != nil {
 		return "", nil, g.Err
 	}
-
-	// fmt.Println("--------- m")
-	// for _, v := range m {
-	// 	fmt.Println(v)
-	// }
-
-	// fmt.Println("--------- n")
-
-	// for _, v := range n {
-	// 	fmt.Println(v)
-	// }
 	bd := strings.Builder{}
 	bd.WriteString("INSERT INTO `")
 
